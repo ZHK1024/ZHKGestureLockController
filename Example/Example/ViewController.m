@@ -13,6 +13,9 @@
 @interface ViewController ()
 
 @property (nonatomic, strong) NSString *nameString;
+- (IBAction)setAction:(UIButton *)sender;
+- (IBAction)resetAction:(UIButton *)sender;
+- (IBAction)checkAction:(UIButton *)sender;
 
 @end
 
@@ -21,9 +24,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    ZHKGestureLockController *gestureLockVC = [[ZHKGestureLockController alloc] init];
-    gestureLockVC.style = kGestureLockCheck;
-    [self.navigationController presentViewController:gestureLockVC animated:NO completion:nil];
+    
     
 //    NSData *data1 = [@"123" dataUsingEncoding:NSUTF8StringEncoding];
 //    NSData *data2 = [@"456" dataUsingEncoding:NSUTF8StringEncoding];
@@ -60,6 +61,24 @@
         self.nameString = @"name";
     }
     return _nameString;
+}
+
+- (IBAction)setAction:(UIButton *)sender {
+    ZHKGestureLockController *gestureLockVC = [[ZHKGestureLockController alloc] init];
+    gestureLockVC.style = kGestureLockSet;
+    [self.navigationController presentViewController:gestureLockVC animated:YES completion:nil];
+}
+
+- (IBAction)resetAction:(UIButton *)sender {
+    ZHKGestureLockController *gestureLockVC = [[ZHKGestureLockController alloc] init];
+    gestureLockVC.style = kGestureLockReset;
+    [self.navigationController presentViewController:gestureLockVC animated:YES completion:nil];
+}
+
+- (IBAction)checkAction:(UIButton *)sender {
+    ZHKGestureLockController *gestureLockVC = [[ZHKGestureLockController alloc] init];
+    gestureLockVC.style = kGestureLockCheck;
+    [self.navigationController presentViewController:gestureLockVC animated:YES completion:nil];
 }
 
 - (void)setName:(NSString *)name {

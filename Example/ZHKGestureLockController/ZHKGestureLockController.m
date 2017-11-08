@@ -48,14 +48,14 @@
 #pragma mark - ZHKGestureLock delegate
 
 - (BOOL)gestureLockView:(ZHKGestureLockView *)lockView checkResultWithPassword:(NSArray *)password {
-//    NSLog(@"pwd = %@", password);
+    NSLog(@"pwd = %@", password);
     
     // 验证
     if (_style == kGestureLockCheck) {
         if ([self checkPassword:password]) {
             lockView.state = kZHKGestureLockStateSuccess;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self dismissViewControllerAnimated:NO completion:nil];
+                [self dismissViewControllerAnimated:YES completion:nil];
             });
             
         }else {
@@ -79,7 +79,7 @@
                 // 保存密码
                 [[NSUserDefaults standardUserDefaults] setValue:pwd forKey:GESTURE_PASSWORD_KEY];
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    [self dismissViewControllerAnimated:NO completion:nil];
+                    [self dismissViewControllerAnimated:YES completion:nil];
                 });
             // 2次输入不相同
             }else {
@@ -98,14 +98,15 @@
         }
     // 重设
     }else if (_style == kGestureLockReset) {
-        NSString *pwd = [[NSUserDefaults standardUserDefaults] objectForKey:GESTURE_PASSWORD_KEY];
+//        NSString *pwd = [[NSUserDefaults standardUserDefaults] objectForKey:GESTURE_PASSWORD_KEY];
         // 第一次验证已经通过, 开始设置
         if (_resetCheckSuccess) {
             if (self.passwordArray.count > 0) {
-                if ([pwd isEqualToString:_passwordArray[0]]) {
+                if ([[self passwordStringFromPasswordArray:password] isEqualToString:[self passwordStringFromPasswordArray:_passwordArray[0]]]) {
                     lockView.state = kZHKGestureLockStateSuccess;
+                    [[NSUserDefaults standardUserDefaults] setValue:[self passwordStringFromPasswordArray:password] forKey:GESTURE_PASSWORD_KEY];
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [self dismissViewControllerAnimated:NO completion:nil];
+                        [self dismissViewControllerAnimated:YES completion:nil];
                     });
                 }else {
                     lockView.state = kZHKGestureLockStateFailed;
@@ -114,7 +115,7 @@
                     });
                 }
             }else {
-                [self.passwordArray addObject:pwd];
+                [self.passwordArray addObject:password];
                 lockView.state = kZHKGestureLockStateNormal;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                     [lockView resetCheck];
@@ -122,7 +123,7 @@
             }
         // 第一次验证未通过
         }else {
-            if ([pwd isEqualToString:[self passwordStringFromPasswordArray:password]]) {
+            if ([self checkGestureLockWithPassword:password]) {
                 lockView.state = kZHKGestureLockStateSuccess;
                 _resetCheckSuccess = YES;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -144,7 +145,8 @@
 #pragma mark - 
 
 - (BOOL)checkPassword:(NSArray *)password {
-    return YES;
+    NSString *passString = [self passwordStringFromPasswordArray:password];
+    return [[[NSUserDefaults standardUserDefaults] valueForKey:GESTURE_PASSWORD_KEY] isEqualToString:passString];
 }
 
 - (NSString *)passwordStringFromPasswordArray:(NSArray *)passwordArray {
